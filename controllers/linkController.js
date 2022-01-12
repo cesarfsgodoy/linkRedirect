@@ -1,3 +1,4 @@
+const res = require('express/lib/response');
 const Link = require('../models/Link')
 
 const redirect = async (req, res) => {
@@ -18,7 +19,7 @@ const addLink = async (req, res) => {
 
     try {
         let doc = await link.save()
-        res.send(`${req.body.title} was added`)
+        res.redirect('/')
     } catch (error) {
         res.render('index', {
             error,
@@ -29,9 +30,9 @@ const addLink = async (req, res) => {
 
 const allLinks = async (req, res) => {
     try {
-        let links = await Link.find({})
+        let docs = await Link.find({})
         res.render('all', {
-            links
+            links: docs
         })
     } catch (error) {
         res.send(error)
@@ -46,9 +47,47 @@ const deleteLink = async (req, res) => {
     }
 
     try {
-        res.send(await Link.findByIdAndDelete(id))
+        await Link.findByIdAndDelete(id)
+        // res.send(id)
+        res.redirect('/')
     } catch (error) {
-        res.send(error)
+        res.status(404).send(error)
+    }
+}
+
+const loadLink = async (req, res) => {
+    let id = req.params.id;
+    try {
+        let doc = await Link.findById(id)
+        res.render('edit', {
+            error: false,
+            body: doc
+        })
+    } catch (error) {
+        res.status(404).send(error)
+    }
+}
+
+const editLink = async (req, res) => {
+    let link = {};
+    link.title = req.body.title
+    link.description = req.body.description
+    link.url = req.body.url
+
+    let id = req.params.id
+    if (!id) {
+        id = req.body.id
+    }
+
+    try {
+        let doc = await Link.findByIdAndUpdate(id, link)
+        res.redirect('/')
+    } catch (error) {
+        console.log('erro aqui')
+        res.render('edit', {
+            error,
+            body: req.body
+        })
     }
 }
 
@@ -56,5 +95,7 @@ module.exports = {
     redirect,
     addLink,
     allLinks,
-    deleteLink
+    deleteLink,
+    loadLink,
+    editLink
 }
