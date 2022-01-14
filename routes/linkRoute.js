@@ -7,7 +7,7 @@ router.use(methodOverride('_method'))
 
 router.get('/', linkController.allLinks)
 router.get('/add', (req, res) => {
-    res.render('index', {
+    res.render('add', {
         error: false,
         body: {}
     })
